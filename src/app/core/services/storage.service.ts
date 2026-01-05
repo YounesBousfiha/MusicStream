@@ -11,12 +11,11 @@ interface MusicDB extends DBSchema {
 }
 
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
-  private dbPromise: Promise<IDBPDatabase<MusicDB>>;
+  private readonly dbPromise: Promise<IDBPDatabase<MusicDB>>;
 
 
   constructor() {
@@ -28,5 +27,25 @@ export class StorageService {
         }
       }
     });
+  }
+
+  async addTrack(track: TrackModel): Promise<void> {
+    const db = await  this.dbPromise;
+    await db.put('tracks', track);
+  }
+
+  async getAllTracks() {
+    const db = await this.dbPromise;
+    return await db.getAll('tracks');
+  }
+
+  async getTrack(id: string): Promise<TrackModel | undefined> {
+    const db = await this.dbPromise;
+    return await db.get('tracks', id);
+  }
+
+  async deleteTrack(id: string) {
+    const db = await this.dbPromise;
+    await db.delete('tracks', id);
   }
 }
