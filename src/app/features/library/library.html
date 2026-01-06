@@ -1,1 +1,120 @@
-<p>library works!</p>
+<div class="container mx-auto px-4 py-6">
+
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-white mb-1">Ma Bibliothèque</h1>
+      <p class="text-gray-400 text-sm">
+        {{ trackService.tracks().length }} titres disponibles
+      </p>
+    </div>
+    <button (click)="openModal()"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full flex items-center gap-2 transition-colors">
+      <span>+</span> Ajouter un titre
+    </button>
+  </div>
+
+  @if (trackService.loading()) {
+    <div class="flex justify-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+    </div>
+  }
+
+  @if (!trackService.loading() && trackService.tracks().length === 0) {
+    <div class="text-center py-20 text-gray-500">
+      <p class="text-xl">Aucun titre dans la bibliothèque.</p>
+      <p class="text-sm mt-2">Cliquez sur "Ajouter" pour commencer.</p>
+    </div>
+  }
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    @for (track of trackService.tracks(); track track.id) {
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-indigo-500/50 transition group relative">
+
+        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 rounded-xl">
+          <button (click)="playTrack(track)"
+                  class="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform">
+            ▶
+          </button>
+        </div>
+
+        <div class="flex gap-4 items-start">
+          <div class="w-16 h-16 bg-gray-800 rounded-lg flex-shrink-0 flex items-center justify-center text-gray-500 text-2xl">
+            🎵
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-white truncate">{{ track.title }}</h3>
+            <p class="text-gray-400 text-sm truncate">{{ track.artist }}</p>
+            <div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
+              <span class="bg-gray-800 px-2 py-0.5 rounded">{{ track.category }}</span>
+              <span>{{ track.duration | number:'1.0-0' }}s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>
+
+@if (isModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-gray-900 border border-gray-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+
+      <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white">Ajouter un nouveau titre</h2>
+        <button (click)="closeModal()" class="text-gray-400 hover:text-white">✕</button>
+      </div>
+
+      <form [formGroup]="trackForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
+
+        @if (uploadError()) {
+          <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">
+            {{ uploadError() }}
+          </div>
+        }
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Titre *</label>
+            <input formControlName="title" type="text" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-1">Artiste *</label>
+            <input formControlName="artist" type="text" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1">Catégorie</label>
+          <select formControlName="category" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option>Pop</option>
+            <option>Rock</option>
+            <option>Rap</option>
+            <option>Jazz</option>
+            <option>Electro</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1">Fichier Audio (Max 10MB) *</label>
+          <input type="file" accept="audio/*" (change)="onAudioSelected($event)"
+                 class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer bg-gray-800 rounded-lg border border-gray-700">
+          @if (audioDuration > 0) {
+            <p class="text-green-400 text-xs mt-1">Durée détectée: {{ audioDuration | number:'1.0-0' }} secondes</p>
+          }
+        </div>
+
+        <div class="pt-4 flex justify-end gap-3">
+          <button type="button" (click)="closeModal()" class="px-4 py-2 text-gray-300 hover:text-white transition-colors">Annuler</button>
+          <button type="submit"
+                  [disabled]="isSubmitting() || trackForm.invalid || !selectedAudioFile"
+                  class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+            @if (isSubmitting()) { <span class="animate-spin">⌛</span> }
+            Sauvegarder
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+}
