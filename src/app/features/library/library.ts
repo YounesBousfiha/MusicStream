@@ -22,9 +22,9 @@ export class Library {
   uploadError = signal<string | null>(null);
 
   trackForm = this.fb.group({
-    title: ['', Validators.required, Validators.maxLength(50)],
+    title: ['', [Validators.required, Validators.maxLength(50)]],
     artist: ['', Validators.required],
-    description: ['', Validators.maxLength(200)],
+    description: ['', [Validators.maxLength(200)]],
     category: ['Pop', Validators.required]
   });
 
