@@ -19,7 +19,7 @@ export class StorageService {
 
 
   constructor() {
-    this.dbPromise = openDB<MusicDB>('MusciStreamDB', 1, {
+    this.dbPromise = openDB<MusicDB>('MusicStreamDB', 1, {
       upgrade(db) {
         if(!db.objectStoreNames.contains('tracks')) {
           const store = db.createObjectStore('tracks', { keyPath: 'id'});
