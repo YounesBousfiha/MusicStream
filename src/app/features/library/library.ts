@@ -1,6 +1,6 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TrackService} from '../../core/services/track.service';
 import {AudioPlayerService} from '../../core/services/audio-player.service';
 import {getAudioDuration, validateAudioFile, validateImageFile} from '../../core/utils/file-utils';
@@ -8,7 +8,7 @@ import {TrackModel} from '../../core/model/track.model';
 
 @Component({
   selector: 'app-library',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './library.html',
   styleUrl: './library.css',
 })
@@ -20,6 +20,8 @@ export class Library {
   isModalOpen = signal(false);
   isSubmitting = signal(false);
   uploadError = signal<string | null>(null);
+  searchTerm = signal('');
+  selectedCategory = signal('All');
 
   trackForm = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(50)]],
@@ -31,6 +33,20 @@ export class Library {
   selectedAudioFile: File  | null = null;
   selectedCoverFile: File | null = null;
   audioDuration = 0;
+
+  filteredTracks = computed(() => {
+    const allTracks = this.trackService.tracks();
+    const term = this.searchTerm().toLowerCase();
+    const category = this.selectedCategory();
+
+    return allTracks.filter(track => {
+      const matchesSearch = track.title.toLowerCase().includes(term) || track.artist.toLowerCase().includes(term);
+
+      const matchesCategory = category === 'All' || track.category === category;
+
+      return matchesSearch && matchesCategory;
+    })
+  })
 
 
   openModal() {
@@ -78,6 +94,18 @@ export class Library {
         return;
       }
       this.selectedCoverFile = file;
+    }
+  }
+
+  async onDeleteTrack(event: Event, track: TrackModel) {
+    event.stopPropagation();
+
+    if(confirm(`Voulez-vous vraiment supprimer${track.title} ?`)) {
+      await this.trackService.deleteTrack(track.id);
+    }
+
+    if(this.playerService.currentTrack()?.id === track.id) {
+      await this.playerService.togglePlay();
     }
   }
 
