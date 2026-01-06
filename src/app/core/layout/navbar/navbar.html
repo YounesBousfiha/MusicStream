@@ -1,1 +1,19 @@
-<p>navbar works!</p>
+<nav class="h-full bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6 shadow-lg">
+
+  <div class="flex items-center gap-2 cursor-pointer" routerLink="/">
+    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+      <span class="text-xl font-bold">M</span>
+    </div>
+    <span class="text-xl font-bold tracking-tight text-white">MusicStream</span>
+  </div>
+
+  <div class="flex items-center gap-6">
+    <a routerLink="/library" routerLinkActive="text-indigo-400"
+       class="text-gray-400 hover:text-white transition-colors font-medium cursor-pointer">
+      Library
+    </a>
+    <span class="text-gray-600">|</span>
+    <div class="w-8 h-8 rounded-full bg-gray-700 border border-gray-600"></div>
+  </div>
+
+</nav>
