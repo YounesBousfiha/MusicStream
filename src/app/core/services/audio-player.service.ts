@@ -18,7 +18,7 @@ export class AudioPlayerService {
   private audio = new Audio();
   private currentObjectUrl: string | null = null;
 
-  private state = signal<PlayerState>({
+  state = signal<PlayerState>({
     currentTrack: null,
     isPlaying: false,
     currenTime: 0,
@@ -68,9 +68,59 @@ export class AudioPlayerService {
   }
 
 
-  playTrack(track: TrackModel) {
+  /* async playTrack(track: TrackModel) {
     if(this.state().currentTrack?.id === track.id) {
       this.togglePlay();
+    }
+  }*/
+
+  async playTrack(track: TrackModel) {
+    if (!track.file || track.file.size === 0) {
+      console.error("❌ Error: File is empty or missing!");
+      return;
+    }
+
+    this.audio.pause();
+
+    if (this.currentObjectUrl) {
+      console.log("3. Revoking old URL");
+      URL.revokeObjectURL(this.currentObjectUrl);
+    }
+
+    try {
+      this.currentObjectUrl = URL.createObjectURL(track.file);
+
+      this.audio.src = this.currentObjectUrl;
+      this.audio.volume = this.state().volume;
+
+      this.audio.load();
+
+      this.updateState({
+        currentTrack: track,
+        status: 'buffering',
+        currentTime: 0
+      });
+
+      await this.audio.play();
+
+      this.updateState({ isPlaying: true, status: 'playing' });
+
+    } catch (error: any) {
+      console.error("❌ PLAYBACK FAILED:", error);
+      console.error("Error Name:", error.name);
+      console.error("Error Message:", error.message);
+
+      this.updateState({
+        isPlaying: false,
+        status: 'error',
+        error: error.message
+      });
+
+      if (error.name === 'NotAllowedError') {
+        alert("Autoplay Blocked: Browser needs a user interaction first.");
+      } else if (error.name === 'NotSupportedError') {
+        alert("Format Error: The browser cannot play this audio file.");
+      }
     }
   }
 
