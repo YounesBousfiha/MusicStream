@@ -1,5 +1,4 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
-import {routes} from '../../app.routes';
 import {StorageService} from './storage.service';
 import {TrackModel} from '../model/track.model';
 
@@ -25,10 +24,9 @@ export class TrackService {
 
   readonly tracks = computed(() => this.state().tracks);
   readonly loading = computed(() => this.state().loading);
-  readonly error = computed(() => this.state().loading);
+  readonly error = computed(() => this.state().error);
 
   constructor() {
-
     this.loadTracks();
   }
 
@@ -41,6 +39,39 @@ export class TrackService {
       this.updateState({ tracks, loading: false})
     } catch (err) {
       this.updateState({ loading: false, error: 'Failed to load Tracks'});
+      console.error(err);
+    }
+  }
+
+  async addTrack(track: TrackModel) {
+
+    this.updateState({ loading: true, error: null});
+    try {
+     await this.storage.addTrack(track);
+
+     const currentTracks = this.state().tracks;
+
+     this.updateState({
+       tracks: [...currentTracks, track],
+       loading: false
+     });
+    } catch (err) {
+      this.updateState({ loading: false, error: 'Failed to Create new Track'});
+      console.error(err);
+    }
+  }
+
+  async deleteTrack(id: string) {
+
+    this.updateState({ loading: true, error: null});
+    try {
+      await this.storage.deleteTrack(id);
+
+      const updatedTracks = this.state().tracks.filter(t => t.id !== id);
+
+      this.updateState({ loading: false, tracks: updatedTracks});
+    } catch (err) {
+      this.updateState({ loading: false, error: 'Failed to Delete track'});
       console.error(err);
     }
   }
