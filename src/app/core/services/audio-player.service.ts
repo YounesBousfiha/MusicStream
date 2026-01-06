@@ -85,9 +85,16 @@ export class AudioPlayerService {
     }
   }
 
-  seekTo() {}
+  seekTo(seconds: number) {
+    this.audio.currentTime = seconds;
+    this.updateState({ currentTime: seconds});
+  }
 
-  setVolume() {}
+  setVolume(value: number) {
+    const volume = Math.max(0, Math.min(1, value));
+    this.audio.volume = volume;
+    this.updateState({ volume });
+  }
 
   private updateState(changes: Partial<PlayerState> | any) {
     this.state.update(current => ({ ...current, ...changes}));
