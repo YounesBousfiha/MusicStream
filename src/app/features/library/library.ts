@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TrackService} from '../../core/services/track.service';
 import {AudioPlayerService} from '../../core/services/audio-player.service';
-import {getAudioDuration, validateAudioFile} from '../../core/utils/file-utils';
+import {getAudioDuration, validateAudioFile, validateImageFile} from '../../core/utils/file-utils';
 import {TrackModel} from '../../core/model/track.model';
 
 @Component({
@@ -67,9 +67,45 @@ export class Library {
     }
   }
 
-  onCoverSelected(event: Event) {}
+  onCoverSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if(input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const error = validateImageFile(file);
 
-  async onSubmit() {}
+      if(error) {
+        this.uploadError.set(error);
+        return;
+      }
+      this.selectedCoverFile = file;
+    }
+  }
+
+  async onSubmit() {
+    if(this.trackForm.invalid || !this.selectedAudioFile) {
+      this.uploadError.set("Veuillez remplir tous les champs obligatroires et ajouter un fichier audio");
+      return;
+    }
+
+    this.isSubmitting.set(true);
+
+    const newTrack: TrackModel = {
+      id: crypto.randomUUID(),
+      title: this.trackForm.value.title!,
+      artist: this.trackForm.value.artist!,
+      description: this.trackForm.value.description! || '',
+      category: this.trackForm.value.category!,
+      createdAt: new Date(),
+      duration: this.audioDuration,
+      file: this.selectedAudioFile,
+      size: this.selectedAudioFile.size,
+    };
+
+    await this.trackService.addTrack(newTrack);
+
+    this.isSubmitting.set(false);
+    this.closeModal();
+  }
 
   playTrack(track: TrackModel) {
     this.playerService.playTrack(track);
