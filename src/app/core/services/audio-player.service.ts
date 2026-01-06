@@ -124,15 +124,26 @@ export class AudioPlayerService {
     }
   }
 
-  togglePlay() {
-    if(this.state().isPlaying) {
+  async togglePlay() {
+    const isPlaying = this.state().isPlaying;
+    if(isPlaying) {
       this.audio.pause();
       this.updateState({ isPlaying: false, status: 'paused'});
+      console.log("Pause");
     } else {
-      if(this.audio.src) {
-        this.updateState({ isPlaying: true, status: 'playing'})
+      if(!this.state().currentTrack) {
+        return;
       }
+
+    try {
+      await this.audio.play();
+      this.updateState({ isPlaying: true, status: 'playing'});
+      console.log("resumed")
+    } catch (err) {
+      console.error("Resume failed:", err);
+      this.updateState({ isPlaying: false, status: 'error'})
     }
+  }
   }
 
   seekTo(seconds: number) {
