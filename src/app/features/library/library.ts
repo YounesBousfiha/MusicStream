@@ -136,8 +136,11 @@ export class Library {
     this.closeModal();
   }
 
-  playTrack(track: TrackModel) {
-    this.playerService.playTrack(track);
+  async playTrack(track: TrackModel) {
+
+    this.playerService.setPlaylist(this.filteredTracks());
+
+    await this.playerService.playTrack(track);
   }
 
 }
