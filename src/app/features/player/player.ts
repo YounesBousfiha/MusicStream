@@ -37,10 +37,11 @@ export class Player {
     this.playerService.setVolume(Number(input.value))
   }
 
-  next() {
-    console.log("Next Track");
+  async next() {
+    await this.playerService.playNext();
   }
-  previous() {
-    console.log("Previous Track");
+
+  async previous() {
+    await this.playerService.playPrevious();
   }
 }
