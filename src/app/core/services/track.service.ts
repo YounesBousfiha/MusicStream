@@ -76,7 +76,30 @@ export class TrackService {
     }
   }
 
+  async updateTrack(updatedTrack: TrackModel) {
+    this.updateState({ loading: true, error: null});
 
+    try  {
+      await this.storage.addTrack(updatedTrack);
+
+      const currentTracks = this.state().tracks;
+      const index = currentTracks.findIndex(t => t.id === updatedTrack.id);
+
+      if(index !== - 1) {
+        const newTracks = [...currentTracks];
+        newTracks[index] = updatedTrack;
+        this.updateState({ tracks: newTracks, loading:false});
+      }
+    } catch(err) {
+      this.updateState({ error: 'Failed to update track', loading: false});
+      console.error(err);
+    }
+  }
+
+
+  getTrackById(id: string): TrackModel | undefined {
+    return this.state().tracks.find(t => t.id === id);
+  }
 
   private updateState(changes: Partial<TrackState>) {
     this.state.update(current => ({ ...current, ...changes}));
