@@ -1,1 +1,110 @@
-<p>track-detail works!</p>
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+
+  <button (click)="goBack()" class="flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
+    <span class="mr-2">←</span> Retour à la bibliothèque
+  </button>
+
+  @if (track()) {
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl p-8">
+
+      <div class="flex flex-col md:flex-row gap-8">
+
+        <div class="w-full md:w-64 flex-shrink-0">
+          <div class="aspect-square bg-gradient-to-br from-indigo-900 to-gray-800 rounded-xl flex items-center justify-center text-6xl shadow-inner">
+            🎵
+          </div>
+
+          <div class="mt-6 flex flex-col gap-3">
+            <button (click)="playThis()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105">
+              <span>▶</span> Écouter
+            </button>
+
+            @if (!isEditing()) {
+              <button (click)="toggleEdit()" class="w-full border border-gray-700 hover:bg-gray-800 text-gray-300 py-2 rounded-lg transition-colors">
+                Modifier les infos
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="flex-1">
+
+          @if (!isEditing()) {
+            <div class="animate-fade-in">
+              <h1 class="text-4xl font-bold text-white mb-2">{{ track()?.title }}</h1>
+              <h2 class="text-xl text-indigo-400 font-medium mb-6">{{ track()?.artist }}</h2>
+
+              <div class="grid grid-cols-2 gap-y-4 text-sm text-gray-400 mb-8">
+                <div>
+                  <span class="block text-gray-500 text-xs uppercase tracking-wider mb-1">Durée</span>
+                  <span class="text-white font-mono">{{ track()?.duration! | duration }}</span>
+                </div>
+                <div>
+                  <span class="block text-gray-500 text-xs uppercase tracking-wider mb-1">Catégorie</span>
+                  <span class="bg-gray-800 px-3 py-1 rounded-full text-white">{{ track()?.category }}</span>
+                </div>
+                <div>
+                  <span class="block text-gray-500 text-xs uppercase tracking-wider mb-1">Taille</span>
+                  <span class="text-white">{{ (track()?.size! / 1024 / 1024) | number:'1.1-2' }} MB</span>
+                </div>
+                <div>
+                  <span class="block text-gray-500 text-xs uppercase tracking-wider mb-1">Ajouté le</span>
+                  <span class="text-white">{{ track()?.createdAt | date:'mediumDate' }}</span>
+                </div>
+              </div>
+
+              @if (track()?.description) {
+                <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-800">
+                  <span class="block text-gray-500 text-xs uppercase tracking-wider mb-2">Description</span>
+                  <p class="text-gray-300 leading-relaxed">{{ track()?.description }}</p>
+                </div>
+              }
+            </div>
+
+          } @else {
+            <form [formGroup]="editForm" (ngSubmit)="saveChanges()" class="space-y-4 animate-fade-in">
+
+              <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Titre</label>
+                <input formControlName="title" type="text" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Artiste</label>
+                <input formControlName="artist" type="text" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Catégorie</label>
+                <select formControlName="category" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                  <option value="Pop">Pop</option>
+                  <option value="Rock">Rock</option>
+                  <option value="Rap">Rap</option>
+                  <option value="Jazz">Jazz</option>
+                  <option value="Electro">Electro</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Description</label>
+                <textarea formControlName="description" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+              </div>
+
+              <div class="flex gap-3 pt-2">
+                <button type="button" (click)="toggleEdit()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition-colors">
+                  Annuler
+                </button>
+                <button type="submit" [disabled]="editForm.invalid || isSubmitting()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors">
+                  Sauvegarder
+                </button>
+              </div>
+
+            </form>
+          }
+
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
