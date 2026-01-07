@@ -3,6 +3,7 @@ import {TrackModel} from '../model/track.model';
 
 interface PlayerState {
   currentTrack: TrackModel | null;
+  playlist: TrackModel[];
   isPlaying: boolean;
   currenTime: number;
   duration: number;
@@ -20,6 +21,7 @@ export class AudioPlayerService {
 
   state = signal<PlayerState>({
     currentTrack: null,
+    playlist: [],
     isPlaying: false,
     currenTime: 0,
     duration: 0,
@@ -67,12 +69,9 @@ export class AudioPlayerService {
     });
   }
 
-
-  /* async playTrack(track: TrackModel) {
-    if(this.state().currentTrack?.id === track.id) {
-      this.togglePlay();
-    }
-  }*/
+  setPlaylist(tracks: TrackModel[]) {
+    this.updateState({ playlist: tracks});
+  }
 
   async playTrack(track: TrackModel) {
     if (!track.file || track.file.size === 0) {
@@ -155,6 +154,36 @@ export class AudioPlayerService {
     const volume = Math.max(0, Math.min(1, value));
     this.audio.volume = volume;
     this.updateState({ volume });
+  }
+
+  async playNext() {
+    const {currentTrack, playlist } = this.state();
+
+    if(!currentTrack || playlist.length === 0) return;
+
+    const currentIndex = playlist.findIndex(track => track.id === currentTrack.id);
+
+    if (currentIndex > playlist.length - 1) {
+      await this.playTrack(playlist[currentIndex + 1]);
+    } else {
+      this.audio.pause();
+      this.audio.currentTime = 0;
+      this.updateState({ isPlaying: false, status: 'stopped'});
+    }
+  }
+
+
+  async playPrevious() {
+    const {currentTrack, playlist } = this.state();
+
+    if(!currentTrack || playlist.length === 0) return;
+    const currentIndex = playlist.findIndex(track => track.id === currentTrack.id);
+
+    if(currentIndex > 0) {
+      await  this.playTrack(playlist[currentIndex - 1]);
+    } else {
+      this.seekTo(0);
+    }
   }
 
   private updateState(changes: Partial<PlayerState> | any) {
