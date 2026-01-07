@@ -5,10 +5,11 @@ import {TrackService} from '../../core/services/track.service';
 import {AudioPlayerService} from '../../core/services/audio-player.service';
 import {getAudioDuration, validateAudioFile, validateImageFile} from '../../core/utils/file-utils';
 import {TrackModel} from '../../core/model/track.model';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-library',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './library.html',
   styleUrl: './library.css',
 })
