@@ -72,7 +72,7 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     @for (track of filteredTracks(); track track.id) {
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-indigo-500/50 transition group relative">
+      <div [routerLink]="['/track', track.id]"  class="bg-gray-900 border border-gray-800 rounded-xl p-4 hover:border-indigo-500/50 transition group relative">
 
         <button
           (click)="onDeleteTrack($event, track)"
@@ -82,7 +82,7 @@
         </button>
 
         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 rounded-xl">
-          <button (click)="playTrack(track)"
+          <button (click)="$event.stopPropagation() ; playTrack(track)"
                   class="w-14 h-14 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform">
             ▶
           </button>
