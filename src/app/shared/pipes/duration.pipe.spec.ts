@@ -2,7 +2,7 @@ import { DurationPipe} from './duration.pipe';
 import {describe, expect} from 'vitest';
 
 
-describe('DurationPipe', () => {
+describe.only('DurationPipe', () => {
   const pipe = new DurationPipe();
 
   it('create an instance', () => {
